@@ -1,14 +1,19 @@
 #include "../include/IApplication.h"
 
+IApplication* IApplication::m_pApp = nullptr;
+
 IApplication::IApplication() :
 	m_iWidth(0),
 	m_iHeight(0),
+	m_bActive(false),
 	m_Window(nullptr)
 {
+	m_pApp = this;
 }
 
 IApplication::~IApplication()
 {
+	m_pApp = nullptr;
 }
 
 bool IApplication::Create(int32_t resX, int32_t resY, const std::string& title)
@@ -22,6 +27,8 @@ bool IApplication::Create(int32_t resX, int32_t resY, const std::string& title)
 	m_iWidth = resX;
 	m_iHeight = resY;
 
+	SetActive(true);
+
 	return true;
 }
 
@@ -33,14 +40,35 @@ void IApplication::Run()
 
 	while (msg.message != WM_QUIT) 
 	{
-		gotMsg = ::GetMessage(&msg, nullptr, 0, 0);
+		if (IsActive()) {
+			gotMsg = ::PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE);
+		}
+		else {
+			gotMsg = ::GetMessage(&msg, nullptr, 0, 0);
+		}
 
 		if (gotMsg) 
 		{
 			::TranslateMessage(&msg);
 			::DispatchMessage(&msg);
 		}
+
+		if (msg.message != WM_QUIT) 
+		{
+			m_Timer.EndTimer();
+			m_Timer.BeginTimer();
+
+			::Sleep(1);
+			Debug(std::string("Frametime: ") + std::to_string(GetFrameTime()) + "\n");
+		}
 	}
+}
+
+void IApplication::SetActive(bool set)
+{
+	m_bActive = set;
+	
+	m_Timer.BeginTimer();
 }
 
 void IApplication::Debug(const wchar_t* msg)
@@ -56,6 +84,37 @@ void IApplication::Debug(const char* msg)
 void IApplication::Debug(const std::string& msg)
 {
 	::OutputDebugStringA(msg.c_str());
+}
+
+bool IApplication::OnEvent(UINT message, WPARAM wParam, LPARAM lParam)
+{
+	switch (message)
+	{
+	case WM_SIZE:
+		if (wParam == SIZE_MINIMIZED) {
+			SetActive(false);
+		}
+		else if (wParam == SIZE_MAXIMIZED || wParam == SIZE_RESTORED) {
+			RECT rect;
+
+			::GetClientRect(GetWindow(), &rect);
+
+			const int32_t windowWidth = rect.right - rect.left;
+			const int32_t windowHeight = rect.bottom - rect.top;
+			
+			if (windowWidth != m_iWidth || windowHeight != m_iHeight) {
+				m_iWidth = windowWidth;
+				m_iHeight = windowHeight;
+			}
+
+			SetActive(true);
+		}
+		break;
+	default:
+		break;
+	}
+
+	return false;
 }
 
 HWND IApplication::MakeWindow(int32_t width, int32_t height, const std::string& title)
@@ -141,5 +200,17 @@ long __stdcall IApplication::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPA
 		break;
 	}
 
-	return (long)::DefWindowProc(hwnd, message, wParam, lParam);
+	bool callDefWndProc = true;
+
+	auto app = IApplication::GetApp();
+
+	if (app) {
+		callDefWndProc = !app->OnEvent(message, wParam, lParam);
+	}
+
+	if (callDefWndProc) {
+		return (long)::DefWindowProc(hwnd, message, wParam, lParam);
+	}
+
+	return 0;
 }
