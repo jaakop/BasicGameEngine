@@ -36,12 +36,24 @@
     <ClCompile Include="..\core\src\Timer.cpp">
       <Filter>Source Files\core\src</Filter>
     </ClCompile>
+    <ClCompile Include="..\core\src\OpenGLRenderer.cpp">
+      <Filter>Source Files\core\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\core\src\IRenderer.cpp">
+      <Filter>Source Files\core\src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\core\include\IApplication.h">
       <Filter>Header Files\core\include</Filter>
     </ClInclude>
     <ClInclude Include="..\core\include\Timer.h">
+      <Filter>Header Files\core\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\core\include\OpenGLRenderer.h">
+      <Filter>Header Files\core\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\core\include\IRenderer.h">
       <Filter>Header Files\core\include</Filter>
     </ClInclude>
   </ItemGroup>

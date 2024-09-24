@@ -1,4 +1,5 @@
 #include "../include/IApplication.h"
+#include "../include/OpenGLRenderer.h"
 
 IApplication* IApplication::m_pApp = nullptr;
 
@@ -6,7 +7,8 @@ IApplication::IApplication() :
 	m_iWidth(0),
 	m_iHeight(0),
 	m_bActive(false),
-	m_Window(nullptr)
+	m_Window(nullptr),
+	m_pRenderer(nullptr)
 {
 	m_pApp = this;
 }
@@ -26,6 +28,12 @@ bool IApplication::Create(int32_t resX, int32_t resY, const std::string& title)
 
 	m_iWidth = resX;
 	m_iHeight = resY;
+	
+	m_pRenderer = std::make_unique<OpenGLRenderer>();
+	
+	if (!m_pRenderer->Create()) {
+		return false;
+	}
 
 	SetActive(true);
 
@@ -58,10 +66,13 @@ void IApplication::Run()
 			m_Timer.EndTimer();
 			m_Timer.BeginTimer();
 
-			::Sleep(1);
-			Debug(std::string("Frametime: ") + std::to_string(GetFrameTime()) + "\n");
+			Debug(std::string("FPS: ") + std::to_string(1.0f / GetFrameTime()) + "\n");
+
+			m_pRenderer->Clear(1.0f, 0.0f, 0.0f, 1.0f);
+			m_pRenderer->Flip();
 		}
 	}
+	m_pRenderer = nullptr;
 }
 
 void IApplication::SetActive(bool set)
@@ -105,6 +116,10 @@ bool IApplication::OnEvent(UINT message, WPARAM wParam, LPARAM lParam)
 			if (windowWidth != m_iWidth || windowHeight != m_iHeight) {
 				m_iWidth = windowWidth;
 				m_iHeight = windowHeight;
+
+				if (m_pRenderer) {
+					m_pRenderer->SetViewport({ 0,0, m_iWidth, m_iHeight });
+				}
 			}
 
 			SetActive(true);

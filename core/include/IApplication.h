@@ -12,6 +12,7 @@
 #include <string_view>
 
 #include "Timer.h"
+#include "IRenderer.h"
 
 class IApplication
 {
@@ -28,6 +29,8 @@ public:
 	inline bool IsActive() const { return m_bActive; }
 
 	inline float GetFrameTime() const { return m_Timer.GetElapsedSeconds(); }
+
+	inline IRenderer* GetRenderer() { return m_pRenderer.get(); }
 
 	void SetActive(bool set);
 
@@ -51,6 +54,8 @@ private:
 
 	Timer m_Timer;
 
+	std::unique_ptr<IRenderer> m_pRenderer;
+	
 	static IApplication* m_pApp;
 
 	static HWND MakeWindow(int32_t width, int32_t height, const std::string& title);
