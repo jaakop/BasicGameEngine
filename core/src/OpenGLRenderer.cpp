@@ -1,5 +1,8 @@
 #include "../include/OpenGLRenderer.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "../include/stb_image.h"
+
 PFNGLBLENDEQUATIONSEPARATEPROC glBlendEquationSeparate = nullptr;
 PFNGLBLENDFUNCSEPARATEPROC glBlendFuncSeparate = nullptr;
 
@@ -160,9 +163,177 @@ void OpenGLRenderer::SetViewport(const glm::ivec4& area)
 	glViewport(area.x, area.y, area.z, area.w);
 }
 
-bool OpenGLRenderer::SetTexture(uint32_t program, uint32_t texture, uint32_t slot, const std::string_view& uniformName)
+bool OpenGLRenderer::SetTexture(GLuint program, GLuint texture, uint32_t slot, const std::string_view& uniformName)
 {
+	glActiveTexture(GL_TEXTURE0 + slot);
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	const GLint location = glGetUniformLocation(program, uniformName.data());
+	if (location >= 0) {
+		glUniform1i(location, slot);
+		return true;
+	}
+
 	return false;
+}
+
+GLuint OpenGLRenderer::CreateTexture(const std::string_view& filename)
+{
+	GLuint textureHandle = 0;
+	int32_t textureWidth = 0;
+	int32_t textureHeight = 0;
+	int32_t bpp = 0;
+	uint8_t* imgdata = stbi_load(filename.data(), &textureWidth, &textureWidth, &bpp, STBI_rgb_alpha);
+
+	if (!imgdata || !textureWidth || !textureHeight || !bpp) {
+		IApplication::Debug("Failed to load image");
+		IApplication::Debug(filename.data());
+		return 0;
+	}
+
+	const int32_t imgdatabytes = textureWidth * textureHeight * 4;
+	for (int32_t i = 0; i < imgdatabytes; i += 4) {
+		const int32_t alpha = imgdata[i + 3];
+		
+		if (alpha != 255) {
+			imgdata[i] = imgdata[i] * alpha / 255;
+			imgdata[i + 1] = imgdata[i + 1] * alpha / 255;
+			imgdata[i + 2] = imgdata[i + 2] * alpha / 255;
+		}
+	}
+		
+	GLint internalFormant = GL_RGBA;
+	GLenum format = GL_RGBA;
+	GLenum err = glGetError();
+
+	glGenTextures(1, &textureHandle);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, textureHandle);
+
+	glTexImage2D(GL_TEXTURE_2D,
+		0,
+		internalFormant,
+		textureWidth,
+		textureHeight,
+		0,
+		format,
+		GL_UNSIGNED_BYTE,
+		imgdata);
+
+	delete[] imgdata;
+
+	err = glGetError();
+
+	return textureHandle;
+}
+
+GLuint OpenGLRenderer::CreateVertexShader(const char* sourceCode)
+{
+	GLuint shaderHandle = glCreateShader(GL_VERTEX_SHADER);
+
+	glShaderSource(shaderHandle, 1, (const char**)&sourceCode, nullptr);
+	glCompileShader(shaderHandle);
+
+	GLint shaderCompiled = 0;
+	glGetShaderiv(shaderHandle, GL_COMPILE_STATUS, &shaderCompiled);
+
+	if (!shaderCompiled) {
+		IApplication::Debug("Failed to compile vertex shader: ");
+		PrintShaderError(shaderHandle);
+
+		glDeleteShader(shaderHandle);
+		shaderHandle = 0;
+	}
+
+	return shaderHandle;
+}
+
+GLuint OpenGLRenderer::CreateVertexShaderFromFile(const std::string_view& filename)
+{
+	std::ifstream f(filename.data(), std::ios::binary);
+	std::vector<char> bytes(
+		(std::istreambuf_iterator<char>(f)),
+		(std::istreambuf_iterator<char>()));
+	bytes.push_back(0);
+
+	return CreateVertexShader(bytes.data());
+}
+
+GLuint OpenGLRenderer::CreateFragmentShader(const char* sourceCode)
+{
+	GLuint shaderHandle = glCreateShader(GL_FRAGMENT_SHADER);
+
+	glShaderSource(shaderHandle, 1, (const char**)&sourceCode, nullptr);
+	glCompileShader(shaderHandle);
+
+	GLint shaderCompiled = 0;
+	glGetShaderiv(shaderHandle, GL_COMPILE_STATUS, &shaderCompiled);
+
+	if (!shaderCompiled) {
+		IApplication::Debug("Failed to compile fragment shader: ");
+		PrintShaderError(shaderHandle);
+
+		glDeleteShader(shaderHandle);
+		shaderHandle = 0;
+	}
+
+	return shaderHandle;
+}
+
+GLuint OpenGLRenderer::CreateFragmentShaderFromFile(const std::string_view& filename)
+{
+	std::ifstream f(filename.data(), std::ios::binary);
+	std::vector<char> bytes(
+		(std::istreambuf_iterator<char>(f)),
+		(std::istreambuf_iterator<char>()));
+	bytes.push_back(0);
+
+	return CreateFragmentShader(bytes.data());
+}
+
+GLuint OpenGLRenderer::CreateProgram(GLuint vertexShade, GLuint fragmentShader)
+{
+	return GLuint();
+}
+
+void OpenGLRenderer::PrintShaderError(GLuint shader)
+{
+	GLint infoLogLength = 0;
+	GLint charsWritten = 0;
+
+	glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength);
+	
+	if (!infoLogLength) {
+		return;
+	}
+
+	char* infoLog = new char[infoLogLength + 1];
+	memset(infoLog, 0, infoLogLength + 1);
+
+	glGetShaderInfoLog(shader, infoLogLength, &charsWritten, infoLog);
+	
+	IApplication::Debug(infoLog);
+	delete[] infoLog;
+}
+
+void OpenGLRenderer::PrintProgramError(GLuint program)
+{
+	GLint infoLogLength = 0;
+	GLint charsWritten = 0;
+
+	glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLogLength);
+
+	if (!infoLogLength) {
+		return;
+	}
+
+	char* infoLog = new char[infoLogLength + 1];
+	memset(infoLog, 0, infoLogLength + 1);
+
+	glGetProgramInfoLog(program, infoLogLength, &charsWritten, infoLog);
+
+	IApplication::Debug(infoLog);
+	delete[] infoLog;
 }
 
 bool OpenGLRenderer::SetDefaultSettings()
@@ -195,8 +366,6 @@ bool OpenGLRenderer::SetDefaultSettings()
 
 	return true;
 }
-
-
 
 bool OpenGLRenderer::InitFunctions()
 {

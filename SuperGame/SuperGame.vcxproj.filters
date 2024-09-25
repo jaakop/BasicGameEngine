@@ -42,6 +42,9 @@
     <ClCompile Include="..\core\src\IRenderer.cpp">
       <Filter>Source Files\core\src</Filter>
     </ClCompile>
+    <ClCompile Include="TheApp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\core\include\IApplication.h">
@@ -55,6 +58,9 @@
     </ClInclude>
     <ClInclude Include="..\core\include\IRenderer.h">
       <Filter>Header Files\core\include</Filter>
+    </ClInclude>
+    <ClInclude Include="TheApp.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

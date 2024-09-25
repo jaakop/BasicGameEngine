@@ -48,6 +48,19 @@ public:
 	 */
 	bool SetTexture(GLuint program, GLuint texture, uint32_t slot, const std::string_view& uniformName) override;
 
+	GLuint CreateTexture(const std::string_view& filename);
+
+	GLuint CreateVertexShader(const char* sourceCode);
+	GLuint CreateVertexShaderFromFile(const std::string_view& filename);
+
+	GLuint CreateFragmentShader(const char* sourceCode);
+	GLuint CreateFragmentShaderFromFile(const std::string_view& filename);
+
+	GLuint CreateProgram(GLuint vertexShade, GLuint fragmentShader);
+
+	void PrintShaderError(GLuint shader);
+	void PrintProgramError(GLuint program);
+
 private:
 	/**
 	 * InitFunctions

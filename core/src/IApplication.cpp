@@ -35,6 +35,10 @@ bool IApplication::Create(int32_t resX, int32_t resY, const std::string& title)
 		return false;
 	}
 
+	if (!OnCreate()) {
+		return false;
+	}
+
 	SetActive(true);
 
 	return true;
@@ -65,13 +69,14 @@ void IApplication::Run()
 		{
 			m_Timer.EndTimer();
 			m_Timer.BeginTimer();
+			
+			OnUpdate(m_Timer.GetElapsedSeconds());
+			OnDraw(*m_pRenderer);
 
-			Debug(std::string("FPS: ") + std::to_string(1.0f / GetFrameTime()) + "\n");
-
-			m_pRenderer->Clear(1.0f, 0.0f, 0.0f, 1.0f);
 			m_pRenderer->Flip();
 		}
 	}
+	OnDestroy();
 	m_pRenderer = nullptr;
 }
 
