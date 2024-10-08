@@ -291,9 +291,22 @@ GLuint OpenGLRenderer::CreateFragmentShaderFromFile(const std::string_view& file
 	return CreateFragmentShader(bytes.data());
 }
 
-GLuint OpenGLRenderer::CreateProgram(GLuint vertexShade, GLuint fragmentShader)
+GLuint OpenGLRenderer::CreateProgram(GLuint vertexShader, GLuint fragmentShader)
 {
-	return GLuint();
+	GLuint programHandle = glCreateProgram();
+	glAttachShader(programHandle, vertexShader);
+	glAttachShader(programHandle, fragmentShader);
+	glLinkProgram(programHandle);
+
+	GLint linked = 0;
+	glGetProgramiv(programHandle, GL_LINK_STATUS, &linked);
+	if (!linked) {
+		IApplication::Debug("Failed to link program: ");
+		PrintProgramError(programHandle);
+		glDeleteProgram(programHandle);
+		programHandle = 0;
+	}
+	return programHandle;
 }
 
 void OpenGLRenderer::PrintShaderError(GLuint shader)

@@ -45,6 +45,9 @@
     <ClCompile Include="TheApp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\core\src\Geometry.cpp">
+      <Filter>Source Files\core\src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\core\include\IApplication.h">
@@ -62,5 +65,12 @@
     <ClInclude Include="TheApp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\core\include\Geometry.h">
+      <Filter>Header Files\core\include</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="phongshader.vert" />
+    <None Include="phongshader.frag" />
   </ItemGroup>
 </Project>

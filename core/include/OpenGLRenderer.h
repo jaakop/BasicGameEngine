@@ -56,7 +56,7 @@ public:
 	GLuint CreateFragmentShader(const char* sourceCode);
 	GLuint CreateFragmentShaderFromFile(const std::string_view& filename);
 
-	GLuint CreateProgram(GLuint vertexShade, GLuint fragmentShader);
+	GLuint CreateProgram(GLuint vertexShader, GLuint fragmentShader);
 
 	void PrintShaderError(GLuint shader);
 	void PrintProgramError(GLuint program);
