@@ -7,15 +7,21 @@ class Geometry {
 public:
 	struct VERTEX
 	{
-		VERTEX() : x(0.0f), y(0.0f), z(0.0f) {}
+		VERTEX() : x(0.0f), y(0.0f), z(0.0f),
+		 tu(0.0f), tv(0.0f) {}
 
-		VERTEX(float _x, float _y, float _z) : x(_x), y(_y), z(_z) {}
+		VERTEX(float _x, float _y, float _z, float _tu, float _tv) :
+			x(_x), y(_y), z(_z),
+			tu(_tu), tv(_tv) {}
 
-		VERTEX(const glm::vec3& pos) : x(pos.x), y(pos.y), z(pos.z) {}
+		VERTEX(const glm::vec3& pos, const float _tu, float _tv) :
+			x(pos.x), y(pos.y), z(pos.z),
+			tu(_tu), tv(_tv) {}
 
-		static constexpr int32_t GetStride() { return 12; }
+		static constexpr int32_t GetStride() { return 20; }
 
 		float x, y, z;
+		float tu, tv;
 	};
 
 	Geometry();

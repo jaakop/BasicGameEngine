@@ -183,7 +183,7 @@ GLuint OpenGLRenderer::CreateTexture(const std::string_view& filename)
 	int32_t textureWidth = 0;
 	int32_t textureHeight = 0;
 	int32_t bpp = 0;
-	uint8_t* imgdata = stbi_load(filename.data(), &textureWidth, &textureWidth, &bpp, STBI_rgb_alpha);
+	uint8_t* imgdata = stbi_load(filename.data(), &textureWidth, &textureHeight, &bpp, STBI_rgb_alpha);
 
 	if (!imgdata || !textureWidth || !textureHeight || !bpp) {
 		IApplication::Debug("Failed to load image");
@@ -223,6 +223,11 @@ GLuint OpenGLRenderer::CreateTexture(const std::string_view& filename)
 	delete[] imgdata;
 
 	err = glGetError();
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 	return textureHandle;
 }
