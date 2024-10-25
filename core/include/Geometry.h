@@ -8,19 +8,26 @@ public:
 	struct VERTEX
 	{
 		VERTEX() : x(0.0f), y(0.0f), z(0.0f),
+		 nx(0.0f), ny(0.0f), nz(0.0f),
 		 tu(0.0f), tv(0.0f) {}
 
-		VERTEX(float _x, float _y, float _z, float _tu, float _tv) :
+		VERTEX(float _x, float _y, float _z, float _nx, float _ny, float _nz, float _tu, float _tv) :
 			x(_x), y(_y), z(_z),
+			nx(_nx), ny(_ny), nz(_nz),
 			tu(_tu), tv(_tv) {}
 
-		VERTEX(const glm::vec3& pos, const float _tu, float _tv) :
+		VERTEX(const glm::vec3& pos, const glm::vec3& normal, const float _tu, float _tv) :
 			x(pos.x), y(pos.y), z(pos.z),
+			nx(normal.x), ny(normal.y), nz(normal.z),
 			tu(_tu), tv(_tv) {}
 
-		static constexpr int32_t GetStride() { return 20; }
+		static constexpr int32_t GetStride() { return 32; }
 
+		// Position
 		float x, y, z;
+		// Normal
+		float nx, ny, nz;
+		// Texture UV
 		float tu, tv;
 	};
 

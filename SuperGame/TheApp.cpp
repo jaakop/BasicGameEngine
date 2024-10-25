@@ -21,6 +21,12 @@ bool TheApp::OnCreate()
         return false;
     }
 
+    renderer->SetViewMatrix(
+        glm::lookAt(glm::vec3(0.0f, 0.0f, 3.0f),
+                    glm::vec3(0.0f, 0.0f, 0.0f),
+                    glm::vec3(0.0f, 1.0f, 0.0f)));
+    renderer->SetProjectionMatrix(glm::perspective(0.61f, GetAspect(), 1.0f, 500.0f));
+
     m_pSphere = std::make_shared<Geometry>();
     m_pSphere->GenSphere(glm::vec3(0.5f, 0.5f, 0.5f));
 
@@ -51,5 +57,16 @@ void TheApp::OnDraw(IRenderer& renderer)
     renderer.SetTexture(m_uProgram, m_uTexture, 0, "texture01");
 
     m_pSphere->SetAttribs(m_uProgram);
+
+    // set the uniforms
+    static float x = 0.0f;
+    m_mModel = glm::rotate(glm::mat4(1.0f), x, glm::vec3(0.0f, 1.0f, 0.0f));
+    //m_mModel[3][0] = x;
+    x += 0.0001f;
+    OpenGLRenderer::SetUniformMatrix4(m_uProgram, "modelMatrix", m_mModel);
+
+    glm::mat4 mvp = renderer.GetProjectionMatrix() * renderer.GetViewMatrix() * m_mModel;
+    OpenGLRenderer::SetUniformMatrix4(m_uProgram, "modelViewProjectionMatrix", mvp);
+
     m_pSphere->Draw(renderer);
 }

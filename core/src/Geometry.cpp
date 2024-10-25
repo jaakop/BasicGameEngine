@@ -42,12 +42,14 @@ void Geometry::GenSphere(const glm::vec3& radius, const glm::vec3& offset, uint3
 				radius.x * x1 + offset.x,
 				radius.y * y1 + offset.y,
 				radius.z * z1 + offset.z,
+				x1,y1,z1,
 				((float)segment) / segments,
 				(ring + 1) / ((float)rings)));
 			m_arrVertices.push_back(VERTEX(
 				radius.x * x0 + offset.x,
 				radius.y * y0 + offset.y,
 				radius.z * z0 + offset.z,
+				x0,y0,z0,
 				((float)segment) / segments,
 				(ring / ((float)rings))));
 		}
@@ -57,6 +59,7 @@ void Geometry::GenSphere(const glm::vec3& radius, const glm::vec3& offset, uint3
 void Geometry::SetAttribs(GLuint program)
 {
 	const GLint position = glGetAttribLocation(program, "position");
+	const GLint normal = glGetAttribLocation(program, "normal");
 	const GLint uv = glGetAttribLocation(program, "uv");
 
 	const float* vertexData = (const float*)m_arrVertices.data();
@@ -64,16 +67,21 @@ void Geometry::SetAttribs(GLuint program)
 	glEnableVertexAttribArray(position);
 	glVertexAttribPointer(position, 3, GL_FLOAT, GL_FALSE, VERTEX::GetStride(), vertexData);
 
+	glEnableVertexAttribArray(normal);
+	glVertexAttribPointer(normal, 3, GL_FLOAT, GL_FALSE, VERTEX::GetStride(), vertexData + 3);
+
 	glEnableVertexAttribArray(uv);
-	glVertexAttribPointer(uv, 2, GL_FLOAT, GL_FALSE, VERTEX::GetStride(), vertexData + 3);
+	glVertexAttribPointer(uv, 2, GL_FLOAT, GL_FALSE, VERTEX::GetStride(), vertexData + 6);
 }
 
 void Geometry::DisableAttribs(GLuint program)
 {
 	const GLint position = glGetAttribLocation(program, "position");
+	const GLint normal = glGetAttribLocation(program, "normal");
 	const GLint uv = glGetAttribLocation(program, "uv");
 
 	glDisableVertexAttribArray(position);
+	glDisableVertexAttribArray(normal);
 	glDisableVertexAttribArray(uv);
 }
 

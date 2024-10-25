@@ -37,6 +37,8 @@ public:
 
 	inline IRenderer* GetRenderer() { return m_pRenderer.get(); }
 
+	inline float GetAspect() { return (float)m_iWidth / (float)m_iHeight; }
+
 	void SetActive(bool set);
 
 	static IApplication* GetApp() { return m_pApp; }

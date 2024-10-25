@@ -48,6 +48,18 @@ public:
 	 */
 	bool SetTexture(GLuint program, GLuint texture, uint32_t slot, const std::string_view& uniformName) override;
 
+	static inline bool SetUniformMatrix4(GLuint program, const char* name, const glm::mat4& m) 
+	{
+		const GLint location = glGetUniformLocation(program, name);
+		
+		if (location == -1) {
+			return false;
+		}
+
+		glUniformMatrix4fv(location, 1, GL_FALSE, &m[0][0]);
+		return true;
+	}
+	
 	GLuint CreateTexture(const std::string_view& filename);
 
 	GLuint CreateVertexShader(const char* sourceCode);

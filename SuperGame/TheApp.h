@@ -21,5 +21,7 @@ private:
 	GLuint m_uTexture;
 
 	std::shared_ptr<Geometry> m_pSphere;
+
+	glm::mat4 m_mModel;
 };
 
