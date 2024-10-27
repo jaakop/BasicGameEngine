@@ -48,6 +48,8 @@ public:
 	static void Debug(const std::string& msg);
 
 protected:
+	virtual void OnScreenChanged(uint32_t widthPixels, uint32_t heightPixels) {}
+
 	virtual bool OnEvent(UINT message, WPARAM wParam, LPARAM lParam);
 
 private:

@@ -48,6 +48,19 @@ public:
 	 */
 	bool SetTexture(GLuint program, GLuint texture, uint32_t slot, const std::string_view& uniformName) override;
 
+
+	static inline bool SetUniformMatrix3(GLuint program, const char* name, const glm::mat3& m) 
+	{
+		const GLint location = glGetUniformLocation(program, name);
+		
+		if (location == -1) {
+			return false;
+		}
+
+		glUniformMatrix3fv(location, 1, GL_FALSE, &m[0][0]);
+		return true;
+	}
+	
 	static inline bool SetUniformMatrix4(GLuint program, const char* name, const glm::mat4& m) 
 	{
 		const GLint location = glGetUniformLocation(program, name);
@@ -59,7 +72,56 @@ public:
 		glUniformMatrix4fv(location, 1, GL_FALSE, &m[0][0]);
 		return true;
 	}
+
+	static inline bool SetUniformFloat(GLuint program, const char* name, float v)
+	{
+		const GLint location = glGetUniformLocation(program, name);
+
+		if (location == -1) {
+			return false;
+		}
+
+		glUniform1fv(location, 1, &v);
+		return true;
+	}	
 	
+	static inline bool SetUniformVec2(GLuint program, const char* name, const glm::vec2& v)
+	{
+		const GLint location = glGetUniformLocation(program, name);
+
+		if (location == -1) {
+			return false;
+		}
+
+		glUniform2fv(location, 1, &v.x);
+		return true;
+	}
+
+	static inline bool SetUniformVec3(GLuint program, const char* name, const glm::vec3& v)
+	{
+		const GLint location = glGetUniformLocation(program, name);
+
+		if (location == -1) {
+			return false;
+		}
+
+		glUniform3fv(location, 1, &v.x);
+		return true;
+	}
+
+	static inline bool SetUniformVec4(GLuint program, const char* name, const glm::vec4& v)
+	{
+		const GLint location = glGetUniformLocation(program, name);
+
+		if (location == -1) {
+			return false;
+		}
+
+		glUniform4fv(location, 1, &v.x);
+		return true;
+	}
+
+
 	GLuint CreateTexture(const std::string_view& filename);
 
 	GLuint CreateVertexShader(const char* sourceCode);

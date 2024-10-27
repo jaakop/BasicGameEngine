@@ -124,6 +124,7 @@ bool IApplication::OnEvent(UINT message, WPARAM wParam, LPARAM lParam)
 
 				if (m_pRenderer) {
 					m_pRenderer->SetViewport({ 0,0, m_iWidth, m_iHeight });
+					OnScreenChanged(m_iWidth, m_iHeight);
 				}
 			}
 

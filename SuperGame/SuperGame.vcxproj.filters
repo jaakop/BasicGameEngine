@@ -48,6 +48,9 @@
     <ClCompile Include="..\core\src\Geometry.cpp">
       <Filter>Source Files\core\src</Filter>
     </ClCompile>
+    <ClCompile Include="..\core\src\Material.cpp">
+      <Filter>Source Files\core\src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\core\include\IApplication.h">
@@ -66,6 +69,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\core\include\Geometry.h">
+      <Filter>Header Files\core\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\core\include\Material.h">
       <Filter>Header Files\core\include</Filter>
     </ClInclude>
   </ItemGroup>

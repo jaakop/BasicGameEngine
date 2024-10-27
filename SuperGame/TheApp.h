@@ -1,6 +1,7 @@
 #pragma once
 #include "../core/include/IApplication.h"
 #include "../core/include/Geometry.h"
+#include "../core/include/Material.h"
 
 class TheApp : public IApplication
 {
@@ -11,6 +12,8 @@ public:
 	void OnDestroy() override;
 	void OnUpdate(float frametime) override;
 	void OnDraw(IRenderer& renderer) override;
+protected:
+	void OnScreenChanged(uint32_t widthPixels, uint32_t heightPixels) override;
 private:
 	OpenGLRenderer* GetOpenGLRenderer() { return static_cast<OpenGLRenderer*>(GetRenderer()); }
 
@@ -21,6 +24,7 @@ private:
 	GLuint m_uTexture;
 
 	std::shared_ptr<Geometry> m_pSphere;
+	std::shared_ptr<Material> m_pMaterial;
 
 	glm::mat4 m_mModel;
 };

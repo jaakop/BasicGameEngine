@@ -26,9 +26,15 @@ bool TheApp::OnCreate()
                     glm::vec3(0.0f, 0.0f, 0.0f),
                     glm::vec3(0.0f, 1.0f, 0.0f)));
     renderer->SetProjectionMatrix(glm::perspective(0.61f, GetAspect(), 1.0f, 500.0f));
-
+    
     m_pSphere = std::make_shared<Geometry>();
     m_pSphere->GenSphere(glm::vec3(0.5f, 0.5f, 0.5f));
+
+    m_pMaterial = std::make_shared<Material>();
+    m_pMaterial->m_cAmbient = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+    m_pMaterial->m_cDiffuse = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+    //m_pMaterial->m_cEmissive = glm::vec4(0.01f, 0.0f, 0.0f, 1.0f);
+    //m_pMaterial->m_fSpecularPower = 0;
 
     return true;
 }
@@ -68,5 +74,18 @@ void TheApp::OnDraw(IRenderer& renderer)
     glm::mat4 mvp = renderer.GetProjectionMatrix() * renderer.GetViewMatrix() * m_mModel;
     OpenGLRenderer::SetUniformMatrix4(m_uProgram, "modelViewProjectionMatrix", mvp);
 
+    OpenGLRenderer::SetUniformVec3(m_uProgram, "cameraPosition", -renderer.GetViewMatrix()[3]);
+
+    const glm::vec3 lightDirection(glm::normalize(glm::vec3(1.0f, -0.25f, -1.0f)));
+    OpenGLRenderer::SetUniformVec3(m_uProgram, "lightDirection", lightDirection);
+
+    m_pMaterial->SetToProgram(m_uProgram);
+
     m_pSphere->Draw(renderer);
 }
+
+void TheApp::OnScreenChanged(uint32_t widthPixels, uint32_t heightPixels)
+{
+    GetOpenGLRenderer()->SetProjectionMatrix(glm::perspective(0.61f, GetAspect(), 1.0f, 500.0f));
+}
+
