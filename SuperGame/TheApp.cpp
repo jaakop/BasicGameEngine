@@ -22,7 +22,7 @@ bool TheApp::OnCreate()
     }
 
     renderer->SetViewMatrix(
-        glm::lookAt(glm::vec3(0.0f, 0.0f, 3.0f),
+        glm::lookAt(glm::vec3(0.0f, 0.0f, 10.0f),
                     glm::vec3(0.0f, 0.0f, 0.0f),
                     glm::vec3(0.0f, 1.0f, 0.0f)));
     renderer->SetProjectionMatrix(glm::perspective(0.61f, GetAspect(), 1.0f, 500.0f));
@@ -36,11 +36,27 @@ bool TheApp::OnCreate()
     //m_pMaterial->m_cEmissive = glm::vec4(0.01f, 0.0f, 0.0f, 1.0f);
     //m_pMaterial->m_fSpecularPower = 0;
 
+    m_pSceneRoot = std::make_unique<Node>();
+
+    for (size_t i = 0; i < 50; i++)
+    {
+        auto node = std::make_shared<GeometryNode>(m_pSphere, m_pMaterial);
+        node->SetTexture(0, m_uTexture);
+
+        node->SetPos(glm::vec3(glm::linearRand(-5.0f, 5.0f), glm::linearRand(0.0f, 5.0f), glm::linearRand(-20.0f, 0.0f)));
+
+        node->SetVelocity(glm::vec3(glm::linearRand(-3.0f, 3.0f), glm::linearRand(-3.0f, 3.0f), glm::linearRand(-3.0f, 3.0f)));
+        node->SetAcceleration(glm::vec3(0.0f,-9.81f,0.0f));
+
+        m_pSceneRoot->AddNode(node);
+    }
+
     return true;
 }
 
 void TheApp::OnDestroy()
 {
+    m_pSceneRoot = nullptr;
     m_pSphere = nullptr;
 
     glDeleteTextures(1, &m_uTexture);
@@ -51,7 +67,24 @@ void TheApp::OnDestroy()
 
 void TheApp::OnUpdate(float frametime)
 {
-    Debug(std::string("FPS: ") + std::to_string(1.0f / frametime) + "\n");
+    if (m_pSceneRoot)
+    {
+        m_pSceneRoot->Update(frametime);
+
+        auto& nodes = m_pSceneRoot->GetNodes();
+        for (auto& node : nodes) 
+        {
+            auto pos = node->GetPos();
+            if (pos.y < -2.0f) 
+            {
+                pos.y = -2.0f;
+                node->SetPos(pos);
+                auto vel = node->GetVelocity();
+                vel.y = -vel.y;
+                node->SetVelocity(vel * 0.9f);
+            }
+        }
+    }
 }
 
 void TheApp::OnDraw(IRenderer& renderer)
@@ -60,28 +93,15 @@ void TheApp::OnDraw(IRenderer& renderer)
 
     glUseProgram(m_uProgram);
 
-    renderer.SetTexture(m_uProgram, m_uTexture, 0, "texture01");
-
-    m_pSphere->SetAttribs(m_uProgram);
-
-    // set the uniforms
-    static float x = 0.0f;
-    m_mModel = glm::rotate(glm::mat4(1.0f), x, glm::vec3(0.0f, 1.0f, 0.0f));
-    //m_mModel[3][0] = x;
-    x += 0.0001f;
-    OpenGLRenderer::SetUniformMatrix4(m_uProgram, "modelMatrix", m_mModel);
-
-    glm::mat4 mvp = renderer.GetProjectionMatrix() * renderer.GetViewMatrix() * m_mModel;
-    OpenGLRenderer::SetUniformMatrix4(m_uProgram, "modelViewProjectionMatrix", mvp);
-
     OpenGLRenderer::SetUniformVec3(m_uProgram, "cameraPosition", -renderer.GetViewMatrix()[3]);
 
     const glm::vec3 lightDirection(glm::normalize(glm::vec3(1.0f, -0.25f, -1.0f)));
     OpenGLRenderer::SetUniformVec3(m_uProgram, "lightDirection", lightDirection);
 
-    m_pMaterial->SetToProgram(m_uProgram);
+    if (m_pSceneRoot) {
+        m_pSceneRoot->Render(renderer, m_uProgram);
+    }
 
-    m_pSphere->Draw(renderer);
 }
 
 void TheApp::OnScreenChanged(uint32_t widthPixels, uint32_t heightPixels)

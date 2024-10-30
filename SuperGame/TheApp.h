@@ -1,5 +1,6 @@
 #pragma once
 #include "../core/include/IApplication.h"
+#include "../core/include/GeometryNode.h"
 #include "../core/include/Geometry.h"
 #include "../core/include/Material.h"
 
@@ -26,6 +27,6 @@ private:
 	std::shared_ptr<Geometry> m_pSphere;
 	std::shared_ptr<Material> m_pMaterial;
 
-	glm::mat4 m_mModel;
+	std::unique_ptr<Node> m_pSceneRoot;
 };
 
