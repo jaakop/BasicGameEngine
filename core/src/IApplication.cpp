@@ -8,9 +8,11 @@ IApplication::IApplication() :
 	m_iHeight(0),
 	m_bActive(false),
 	m_Window(nullptr),
-	m_pRenderer(nullptr)
+	m_pRenderer(nullptr),
+	m_MousePosDelta(0.0f)
 {
 	m_pApp = this;
+	std::memset(m_MouseButtonStates, 0, 8);
 }
 
 IApplication::~IApplication()
@@ -29,6 +31,8 @@ bool IApplication::Create(int32_t resX, int32_t resY, const std::string& title)
 	m_iWidth = resX;
 	m_iHeight = resY;
 	
+	InitMouse(m_Window);
+
 	m_pRenderer = std::make_unique<OpenGLRenderer>();
 	
 	if (!m_pRenderer->Create()) {
@@ -70,12 +74,16 @@ void IApplication::Run()
 			m_Timer.EndTimer();
 			m_Timer.BeginTimer();
 			
+			m_MousePosDelta = ReadMouse(m_MouseButtonStates);
+
 			OnUpdate(m_Timer.GetElapsedSeconds());
 			OnDraw(*m_pRenderer);
 
 			m_pRenderer->Flip();
 		}
 	}
+	ReleaseMouse();
+
 	OnDestroy();
 	m_pRenderer = nullptr;
 }
@@ -112,6 +120,11 @@ bool IApplication::IsKeyDown(uint32_t keyCode)
 	return ::GetAsyncKeyState(keyCode);
 }
 
+bool IApplication::IsMouseButtonDown(uint32_t buttonIndex) const
+{
+	return (buttonIndex < 8) ? m_MouseButtonStates[buttonIndex] : false;
+}
+
 bool IApplication::OnEvent(UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)
@@ -141,8 +154,43 @@ bool IApplication::OnEvent(UINT message, WPARAM wParam, LPARAM lParam)
 			SetActive(true);
 		}
 		break;
+
 	case WM_KEYDOWN:
 		OnKeyDown((uint32_t)wParam);
+		break;
+
+	case WM_LBUTTONDOWN:
+		OnMouseBegin(0, glm::vec2(LOWORD(lParam), HIWORD(lParam)));
+		break;
+	case WM_MBUTTONDOWN:
+		OnMouseBegin(1, glm::vec2(LOWORD(lParam), HIWORD(lParam)));
+		break;
+	case WM_RBUTTONDOWN:
+		OnMouseBegin(2, glm::vec2(LOWORD(lParam), HIWORD(lParam)));
+		break;
+
+	case WM_LBUTTONUP:
+		OnMouseEnd(0, glm::vec2(LOWORD(lParam), HIWORD(lParam)));
+		break;
+	case WM_MBUTTONUP:
+		OnMouseEnd(1, glm::vec2(LOWORD(lParam), HIWORD(lParam)));
+		break;
+	case WM_RBUTTONUP:
+		OnMouseEnd(2, glm::vec2(LOWORD(lParam), HIWORD(lParam)));
+		break;
+
+	case WM_MOUSEMOVE:
+		{
+			int32_t pointerIndex = -1;
+			if ((wParam & MK_LBUTTON) != 0) pointerIndex = 0;
+			else if ((wParam & MK_MBUTTON) != 0) pointerIndex = 1;
+			else if ((wParam & MK_RBUTTON) != 0) pointerIndex = 2;
+
+			if (pointerIndex != -1)
+			{
+				OnMouseDrag(pointerIndex, glm::vec2(LOWORD(lParam), HIWORD(lParam)));
+			}
+		}
 		break;
 	default:
 		break;
@@ -247,4 +295,64 @@ long __stdcall IApplication::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPA
 	}
 
 	return 0;
+}
+
+// High Performance Mouse
+#define DIRECTINPUT_VERSION 0x0800
+#include <dinput.h>
+#pragma comment(lib, "dxguid.lib")
+#pragma comment(lib, "dinput8.lib")
+
+LPDIRECTINPUT8 g_pDI = nullptr;
+LPDIRECTINPUTDEVICE8 g_pMouse = nullptr;
+
+void IApplication::InitMouse(HWND hwnd)
+{
+	DirectInput8Create(GetModuleHandle(NULL), DIRECTINPUT_VERSION, IID_IDirectInput8, (VOID**)&g_pDI, NULL);
+	g_pDI->CreateDevice(GUID_SysMouse, &g_pMouse, NULL);
+	g_pMouse->SetDataFormat(&c_dfDIMouse2);
+	g_pMouse->SetCooperativeLevel(hwnd, DISCL_NONEXCLUSIVE | DISCL_FOREGROUND);
+	g_pMouse->Acquire();
+}
+
+glm::vec2 IApplication::ReadMouse(uint8_t* buttons)
+{
+
+	glm::vec2 mouseDelta(0.0f);
+
+	if (g_pMouse) 
+	{
+		DIMOUSESTATE2 dims2;
+		std::memset(&dims2, 0, sizeof(dims2));
+
+		HRESULT hr = g_pMouse->GetDeviceState(sizeof(DIMOUSESTATE2), &dims2);
+
+		if (FAILED(hr))
+		{
+			hr = g_pMouse->Acquire();
+		}
+		else
+		{
+			mouseDelta.x = (float)dims2.lX;
+			mouseDelta.y = (float)dims2.lY;
+			std::memcpy(buttons, dims2.rgbButtons, 8);
+		}
+	}
+
+	return mouseDelta;
+}
+
+void IApplication::ReleaseMouse()
+{
+	if (g_pMouse) 
+	{
+		g_pMouse->Unacquire();
+		g_pMouse->Release();
+		g_pMouse = nullptr;
+	}
+	if (g_pDI)
+	{
+		g_pDI->Release();
+		g_pDI = nullptr;
+	}
 }
