@@ -15,6 +15,8 @@ public:
 	void OnDraw(IRenderer& renderer) override;
 protected:
 	void OnScreenChanged(uint32_t widthPixels, uint32_t heightPixels) override;
+
+	void SetRandomRotation(Node& node);
 private:
 	OpenGLRenderer* GetOpenGLRenderer() { return static_cast<OpenGLRenderer*>(GetRenderer()); }
 

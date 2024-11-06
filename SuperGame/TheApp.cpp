@@ -22,13 +22,14 @@ bool TheApp::OnCreate()
     }
 
     renderer->SetViewMatrix(
-        glm::lookAt(glm::vec3(0.0f, 0.0f, 10.0f),
+        glm::lookAt(glm::vec3(0.0f, -10.0f, 20.0f),
                     glm::vec3(0.0f, 0.0f, 0.0f),
                     glm::vec3(0.0f, 1.0f, 0.0f)));
     renderer->SetProjectionMatrix(glm::perspective(0.61f, GetAspect(), 1.0f, 500.0f));
     
+    constexpr float radius = 1.0f;
     m_pSphere = std::make_shared<Geometry>();
-    m_pSphere->GenSphere(glm::vec3(0.5f, 0.5f, 0.5f));
+    m_pSphere->GenSphere(glm::vec3(radius));
 
     m_pMaterial = std::make_shared<Material>();
     m_pMaterial->m_cAmbient = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
@@ -38,15 +39,29 @@ bool TheApp::OnCreate()
 
     m_pSceneRoot = std::make_unique<Node>();
 
-    for (size_t i = 0; i < 50; i++)
+    for (size_t i = 0; i < 20; i++)
     {
         auto node = std::make_shared<GeometryNode>(m_pSphere, m_pMaterial);
         node->SetTexture(0, m_uTexture);
 
         node->SetPos(glm::vec3(glm::linearRand(-5.0f, 5.0f), glm::linearRand(0.0f, 5.0f), glm::linearRand(-20.0f, 0.0f)));
 
-        node->SetVelocity(glm::vec3(glm::linearRand(-3.0f, 3.0f), glm::linearRand(-3.0f, 3.0f), glm::linearRand(-3.0f, 3.0f)));
-        node->SetAcceleration(glm::vec3(0.0f,-9.81f,0.0f));
+        if(glm::linearRand(0, 5) == 0) 
+        {
+            for (size_t j = 0; j < 5; j++)
+            {
+                auto node2 = std::make_shared<GeometryNode>(m_pSphere, m_pMaterial);
+                node2->SetTexture(0, m_uTexture);
+                node2->SetPos({ 0.0f, radius *2.0f * (j + 1), 0.0f});
+                node->AddNode(node2);
+            }
+            SetRandomRotation(*node);
+        }
+
+        //node->SetVelocity(glm::vec3(glm::linearRand(-3.0f, 3.0f), glm::linearRand(-3.0f, 3.0f), glm::linearRand(-3.0f, 3.0f)));
+        //node->SetAcceleration(glm::vec3(0.0f, -9.81f, 0.0f));
+
+        //SetRandomRotation(*node);
 
         m_pSceneRoot->AddNode(node);
     }
@@ -82,6 +97,15 @@ void TheApp::OnUpdate(float frametime)
                 auto vel = node->GetVelocity();
                 vel.y = -vel.y;
                 node->SetVelocity(vel * 0.9f);
+
+                if (glm::length(node->GetVelocity()) < 0.2f) 
+                {
+
+                }
+                else 
+                {
+                    SetRandomRotation(*node);
+                }
             }
         }
     }
@@ -107,5 +131,14 @@ void TheApp::OnDraw(IRenderer& renderer)
 void TheApp::OnScreenChanged(uint32_t widthPixels, uint32_t heightPixels)
 {
     GetOpenGLRenderer()->SetProjectionMatrix(glm::perspective(0.61f, GetAspect(), 1.0f, 500.0f));
+}
+
+void TheApp::SetRandomRotation(Node& node)
+{
+    const glm::vec3& axis(glm::normalize(glm::vec3(glm::linearRand(-1.0f, 1.0f), glm::linearRand(-1.0f, 1.0f), glm::linearRand(-1.0f, 1.0f))));
+    node.SetRotationAxis(axis);
+    node.SetRotationAngle(glm::linearRand(0.0f, glm::two_pi<float>()));
+
+    node.SetRotationSpeed(glm::linearRand(-5.0f, 5.0f));
 }
 
