@@ -23,6 +23,8 @@ public:
 	bool Create(int32_t resX, int32_t resY, const std::string& title);
 	void Run();
 
+	void Close();
+
 	virtual bool OnCreate() = 0;
 	virtual void OnDestroy() = 0;
 	virtual void OnUpdate(float frametime) = 0;
@@ -47,8 +49,11 @@ public:
 	static void Debug(const char* msg);
 	static void Debug(const std::string& msg);
 
+	static bool IsKeyDown(uint32_t keyCode);
+
 protected:
 	virtual void OnScreenChanged(uint32_t widthPixels, uint32_t heightPixels) {}
+	virtual bool OnKeyDown(uint32_t keyCode) { return false; }
 
 	virtual bool OnEvent(UINT message, WPARAM wParam, LPARAM lParam);
 

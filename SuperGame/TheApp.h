@@ -15,6 +15,7 @@ public:
 	void OnDraw(IRenderer& renderer) override;
 protected:
 	void OnScreenChanged(uint32_t widthPixels, uint32_t heightPixels) override;
+	bool OnKeyDown(uint32_t keyCode) override;
 
 	void SetRandomRotation(Node& node);
 private:

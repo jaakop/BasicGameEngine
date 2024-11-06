@@ -84,6 +84,19 @@ void TheApp::OnUpdate(float frametime)
 {
     if (m_pSceneRoot)
     {
+        if (IsKeyDown(VK_LEFT))
+        {
+            m_pSceneRoot->SetVelocity({ -5.0f, 0.0f, 0.0f });
+        }
+        else if (IsKeyDown(VK_RIGHT))
+        {
+            m_pSceneRoot->SetVelocity({ 5.0f, 0.0f, 0.0f });
+        }
+        else
+        {
+            m_pSceneRoot->SetVelocity({ 0.0f, 0.0f, 0.0f });
+        }
+
         m_pSceneRoot->Update(frametime);
 
         auto& nodes = m_pSceneRoot->GetNodes();
@@ -131,6 +144,16 @@ void TheApp::OnDraw(IRenderer& renderer)
 void TheApp::OnScreenChanged(uint32_t widthPixels, uint32_t heightPixels)
 {
     GetOpenGLRenderer()->SetProjectionMatrix(glm::perspective(0.61f, GetAspect(), 1.0f, 500.0f));
+}
+
+bool TheApp::OnKeyDown(uint32_t keyCode)
+{
+    if (keyCode == VK_ESCAPE)
+    {
+        Close();
+        return true;
+    }
+    return false;
 }
 
 void TheApp::SetRandomRotation(Node& node)

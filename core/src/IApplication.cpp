@@ -80,6 +80,11 @@ void IApplication::Run()
 	m_pRenderer = nullptr;
 }
 
+void IApplication::Close()
+{
+	::PostQuitMessage(0);
+}
+
 void IApplication::SetActive(bool set)
 {
 	m_bActive = set;
@@ -100,6 +105,11 @@ void IApplication::Debug(const char* msg)
 void IApplication::Debug(const std::string& msg)
 {
 	::OutputDebugStringA(msg.c_str());
+}
+
+bool IApplication::IsKeyDown(uint32_t keyCode)
+{
+	return ::GetAsyncKeyState(keyCode);
 }
 
 bool IApplication::OnEvent(UINT message, WPARAM wParam, LPARAM lParam)
@@ -130,6 +140,9 @@ bool IApplication::OnEvent(UINT message, WPARAM wParam, LPARAM lParam)
 
 			SetActive(true);
 		}
+		break;
+	case WM_KEYDOWN:
+		OnKeyDown((uint32_t)wParam);
 		break;
 	default:
 		break;
