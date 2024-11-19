@@ -135,6 +135,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\core\src\CameraNode.cpp" />
     <ClCompile Include="..\core\src\Geometry.cpp" />
     <ClCompile Include="..\core\src\GeometryNode.cpp" />
     <ClCompile Include="..\core\src\IApplication.cpp" />
@@ -147,6 +148,7 @@
     <ClCompile Include="TheApp.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\core\include\CameraNode.h" />
     <ClInclude Include="..\core\include\Geometry.h" />
     <ClInclude Include="..\core\include\GeometryNode.h" />
     <ClInclude Include="..\core\include\IApplication.h" />

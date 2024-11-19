@@ -3,6 +3,7 @@
 #include "../core/include/GeometryNode.h"
 #include "../core/include/Geometry.h"
 #include "../core/include/Material.h"
+#include "../core/include/CameraNode.h"
 
 class TheApp : public IApplication
 {

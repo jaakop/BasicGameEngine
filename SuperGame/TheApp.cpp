@@ -20,12 +20,6 @@ bool TheApp::OnCreate()
     {
         return false;
     }
-
-    renderer->SetViewMatrix(
-        glm::lookAt(glm::vec3(0.0f, -10.0f, 20.0f),
-                    glm::vec3(0.0f, 0.0f, 0.0f),
-                    glm::vec3(0.0f, 1.0f, 0.0f)));
-    renderer->SetProjectionMatrix(glm::perspective(0.61f, GetAspect(), 1.0f, 500.0f));
     
     constexpr float radius = 1.0f;
     m_pSphere = std::make_shared<Geometry>();
@@ -38,6 +32,12 @@ bool TheApp::OnCreate()
     //m_pMaterial->m_fSpecularPower = 0;
 
     m_pSceneRoot = std::make_unique<Node>();
+
+    auto camera = std::make_shared<CameraNode>();
+    camera->SetName("camera");
+    camera->SetAspect(GetAspect());
+    camera->SetPos({ 0.0f, 0.0f, 10.0f });
+    m_pSceneRoot->AddNode(camera);
 
     for (size_t i = 0; i < 20; i++)
     {
@@ -130,6 +130,9 @@ void TheApp::OnDraw(IRenderer& renderer)
 
     glUseProgram(m_uProgram);
 
+    const auto* camera = static_cast<CameraNode*>(m_pSceneRoot->FindNode("camera"));
+    camera->Activate(renderer);
+
     OpenGLRenderer::SetUniformVec3(m_uProgram, "cameraPosition", -renderer.GetViewMatrix()[3]);
 
     const glm::vec3 lightDirection(glm::normalize(glm::vec3(1.0f, -0.25f, -1.0f)));
@@ -143,7 +146,11 @@ void TheApp::OnDraw(IRenderer& renderer)
 
 void TheApp::OnScreenChanged(uint32_t widthPixels, uint32_t heightPixels)
 {
-    GetOpenGLRenderer()->SetProjectionMatrix(glm::perspective(0.61f, GetAspect(), 1.0f, 500.0f));
+    if (!m_pSceneRoot)
+        return;
+
+    auto camera = static_cast<CameraNode*>(m_pSceneRoot->FindNode("camera"));
+    camera->SetAspect(GetAspect());
 }
 
 bool TheApp::OnKeyDown(uint32_t keyCode)
