@@ -4,6 +4,7 @@
 #include "../core/include/Geometry.h"
 #include "../core/include/Material.h"
 #include "../core/include/CameraNode.h"
+#include "../core/include/WasdControllerNode.h"
 
 class TheApp : public IApplication
 {

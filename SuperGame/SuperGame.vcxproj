@@ -144,6 +144,7 @@
     <ClCompile Include="..\core\src\OpenGLRenderer.cpp" />
     <ClCompile Include="..\core\src\IRenderer.cpp" />
     <ClCompile Include="..\core\src\Timer.cpp" />
+    <ClCompile Include="..\core\src\WasdControllerNode.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="TheApp.cpp" />
   </ItemGroup>
@@ -157,6 +158,7 @@
     <ClInclude Include="..\core\include\OpenGLRenderer.h" />
     <ClInclude Include="..\core\include\IRenderer.h" />
     <ClInclude Include="..\core\include\Timer.h" />
+    <ClInclude Include="..\core\include\WasdControllerNode.h" />
     <ClInclude Include="TheApp.h" />
   </ItemGroup>
   <ItemGroup>

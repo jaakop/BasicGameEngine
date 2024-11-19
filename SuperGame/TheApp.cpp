@@ -39,6 +39,10 @@ bool TheApp::OnCreate()
     camera->SetPos({ 0.0f, 0.0f, 10.0f });
     m_pSceneRoot->AddNode(camera);
 
+    auto wasdController = std::make_shared<WasdControllerNode>();
+    wasdController->SetControlNode(camera);
+    m_pSceneRoot->AddNode(wasdController);
+
     for (size_t i = 0; i < 20; i++)
     {
         auto node = std::make_shared<GeometryNode>(m_pSphere, m_pMaterial);
